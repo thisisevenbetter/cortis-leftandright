@@ -322,13 +322,13 @@
     }
 
     #resultCanvas {
-      width: 1600px;
-      height: 1200px;
+      width: 1440px;
+      height: 1080px;
       background:
         radial-gradient(circle at top right, rgba(220, 232, 223, 0.85), transparent 24%),
         linear-gradient(180deg, #f8f4ef 0%, var(--result-bg) 100%);
       color: #111;
-      padding: 42px 54px 40px;
+      padding: 34px 48px 24px;
       position: relative;
       overflow: hidden;
     }
@@ -415,26 +415,29 @@
     .result-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 30px;
-      row-gap: 18px;
+      column-gap: 24px;
+      row-gap: 14px;
     }
     
     .result-card {
       display: grid;
-      grid-template-columns: 138px 1fr;
-      gap: 16px;
+      grid-template-columns: 124px minmax(0, 1fr);
+      gap: 14px;
       align-items: start;
       background: rgba(255,255,255,0.32);
       border: 1.5px solid rgba(0,0,0,0.1);
-      border-radius: 28px;
-      padding: 16px;
+      border-radius: 24px;
+      padding: 14px;
       backdrop-filter: blur(2px);
     }
 
     .result-avatar {
-      width: 138px;
-      aspect-ratio: 1 / 1;
-      height: auto;
+      width: 124px;
+      height: 124px;
+      min-width: 124px;
+      min-height: 124px;
+      max-width: 124px;
+      max-height: 124px;
       border-radius: 50%;
       object-fit: cover;
       object-position: center;
@@ -492,13 +495,13 @@
     }
 
     .reason-box {
-      min-height: 150px;
+      min-height: 132px;
       border: 1.6px solid #111;
-      border-radius: 22px;
+      border-radius: 20px;
       background: rgba(255,255,255,0.7);
-      padding: 16px 16px 14px;
-      font-size: 18px;
-      line-height: 1.55;
+      padding: 14px 14px 12px;
+      font-size: 17px;
+      line-height: 1.5;
       letter-spacing: -0.02em;
       word-break: keep-all;
       white-space: pre-wrap;
@@ -506,8 +509,8 @@
     }
 
     .result-footer {
-      margin-top: 24px;
-      padding-top: 12px;
+      margin-top: 14px;
+      padding-top: 0;
       text-align: center;
       font-size: 15px;
       color: #6b6b6b;
@@ -793,19 +796,34 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    function waitForImages(container) {
+      const images = Array.from(container.querySelectorAll("img"));
+      return Promise.all(
+        images.map((img) => {
+          if (img.complete) return Promise.resolve();
+          return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        })
+      );
+    }
+    
     async function downloadImage() {
       const button = document.getElementById("downloadBtn");
       const original = button.textContent;
       try {
         button.disabled = true;
         button.textContent = "이미지 생성 중...";
+        await waitForImages(resultCanvas);
 
         const canvas = await html2canvas(resultCanvas, {
-          backgroundColor: "ededed",
-          scale: 2,
+          backgroundColor: null,
+          scale: window.devicePixelRatio > 1 ? 2 : 1.5,
           useCORS: true,
           allowTaint: false,
-          logging: false
+          logging: false,
+          imageTimeout: 0
         });
 
         const link = document.createElement("a");
