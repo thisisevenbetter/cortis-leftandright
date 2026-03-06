@@ -322,13 +322,15 @@
     }
 
     #resultCanvas {
-      width: 1400px;
+      width: 1600px;
+      height: 1200px;
       background:
         radial-gradient(circle at top right, rgba(220, 232, 223, 0.85), transparent 24%),
         linear-gradient(180deg, #f8f4ef 0%, var(--result-bg) 100%);
       color: #111;
-      padding: 38px 54px 44px;
+      padding: 42px 54px 40px;
       position: relative;
+      overflow: hidden;
     }
 
     .result-header {
@@ -413,27 +415,30 @@
     .result-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 34px;
-      row-gap: 24px;
+      column-gap: 30px;
+      row-gap: 18px;
     }
-
+    
     .result-card {
       display: grid;
-      grid-template-columns: 154px 1fr;
-      gap: 18px;
+      grid-template-columns: 138px 1fr;
+      gap: 16px;
       align-items: start;
       background: rgba(255,255,255,0.32);
       border: 1.5px solid rgba(0,0,0,0.1);
       border-radius: 28px;
-      padding: 18px;
+      padding: 16px;
       backdrop-filter: blur(2px);
     }
 
     .result-avatar {
-      width: 154px;
-      height: 154px;
-      border-radius: 999px;
+      width: 138px;
+      aspect-ratio: 1 / 1;
+      height: auto;
+      border-radius: 50%;
       object-fit: cover;
+      object-position: center;
+      display: block;
       background: #dadada;
       border: 2px solid rgba(255,255,255,0.9);
       box-shadow: 0 10px 18px rgba(0,0,0,0.08);
@@ -487,13 +492,13 @@
     }
 
     .reason-box {
-      min-height: 174px;
+      min-height: 150px;
       border: 1.6px solid #111;
       border-radius: 22px;
       background: rgba(255,255,255,0.7);
-      padding: 17px 17px 15px;
-      font-size: 19px;
-      line-height: 1.58;
+      padding: 16px 16px 14px;
+      font-size: 18px;
+      line-height: 1.55;
       letter-spacing: -0.02em;
       word-break: keep-all;
       white-space: pre-wrap;
@@ -796,7 +801,7 @@
         button.textContent = "이미지 생성 중...";
 
         const canvas = await html2canvas(resultCanvas, {
-          backgroundColor: "#ededed",
+          backgroundColor: "ededed",
           scale: 2,
           useCORS: true,
           allowTaint: false,
