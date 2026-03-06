@@ -40,6 +40,7 @@
 
     body {
       min-height: 100vh;
+      overflow-x: auto;
     }
 
     button, input, textarea {
@@ -47,7 +48,8 @@
     }
 
     .app {
-      width: min(1180px, calc(100% - 32px));
+      width: 1200px;
+      min-width: 1200px;
       margin: 0 auto;
       padding: 28px 0 40px;
     }
@@ -332,6 +334,9 @@
       position: relative;
       overflow: hidden;
       flex: 0 0 auto;
+    
+      display: flex;
+      flex-direction: column;
     }
 
     .result-header {
@@ -418,6 +423,8 @@
       grid-template-columns: 1fr 1fr;
       column-gap: 20px;
       row-gap: 12px;
+      flex: 1;
+      align-content: start;
     }
     
     .result-card {
@@ -446,14 +453,14 @@
       box-shadow: 0 8px 14px rgba(0,0,0,0.08);
       position: relative;
     }
-
-.result-avatar-image {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
+    
+    .result-avatar-image {
+      position: absolute;
+      inset: 0;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
 
     .result-content {
       min-width: 0;
@@ -517,8 +524,8 @@
     }
 
     .result-footer {
-      margin-top: 10px;
-      padding-top: 0;
+      margin-top: auto;
+      padding-top: 8px;
       text-align: center;
       font-size: 14px;
       color: #6b6b6b;
@@ -700,9 +707,7 @@
       membersEditor.innerHTML = members.map((member, index) => `
         <article class="member-editor">
           <div class="member-top">
-            <div class="result-avatar">
-              <div class="result-avatar-image" style="background-image: url('${member.img}');"></div>
-            </div>
+            <img class="avatar" src="${member.img}" alt="${member.name}" crossorigin="anonymous" />
             <div class="member-name">${member.name}</div>
           </div>
 
@@ -777,10 +782,12 @@
           ${members.map((member) => `
             <section class="result-card">
               <div
-                class="result-avatar"
-                style="background-image: url('${member.img}');"
-                aria-label="${member.name}"
-              ></div>
+                <div class="result-avatar" aria-label="${member.name}">
+                  <div
+                    class="result-avatar-image"
+                    style="background-image: url('${member.img}');"
+                  ></div>
+                </div>
               <div class="result-content">
                 <div class="bar-row">
                   <div class="bar-side">공<strong>${member.ratio}</strong></div>
