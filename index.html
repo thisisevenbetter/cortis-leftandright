@@ -325,7 +325,7 @@
 
     #resultCanvas {
       width: 1200px;
-      height: 900px;
+      height: 820px;
       background:
         radial-gradient(circle at top right, rgba(220, 232, 223, 0.85), transparent 24%),
         linear-gradient(180deg, #f8f4ef 0%, var(--result-bg) 100%);
@@ -334,9 +334,6 @@
       position: relative;
       overflow: hidden;
       flex: 0 0 auto;
-    
-      display: flex;
-      flex-direction: column;
     }
 
     .result-header {
@@ -423,8 +420,6 @@
       grid-template-columns: 1fr 1fr;
       column-gap: 20px;
       row-gap: 12px;
-      flex: 1;
-      align-content: start;
     }
     
     .result-card {
@@ -524,8 +519,8 @@
     }
 
     .result-footer {
-      margin-top: auto;
-      padding-top: 8px;
+      margin-top: 8px;
+      padding-top: 0;
       text-align: center;
       font-size: 14px;
       color: #6b6b6b;
@@ -781,13 +776,12 @@
         <div class="result-grid">
           ${members.map((member) => `
             <section class="result-card">
-              <div
-                <div class="result-avatar" aria-label="${member.name}">
-                  <div
-                    class="result-avatar-image"
-                    style="background-image: url('${member.img}');"
-                  ></div>
-                </div>
+              <div class="result-avatar" aria-label="${member.name}">
+                <div
+                  class="result-avatar-image"
+                  style="background-image: url('${member.img}');"
+                ></div>
+              </div>
               <div class="result-content">
                 <div class="bar-row">
                   <div class="bar-side">공<strong>${member.ratio}</strong></div>
