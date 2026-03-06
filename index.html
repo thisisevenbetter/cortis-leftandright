@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>콜페스 공수취향표 생성기</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f2ee;
+      --card: #fffdfb;
+      --text: #171717;
+      --muted: #756d66;
+      --line: #1d1d1d;
+      --soft-line: #ded6cf;
+      --accent: #6f8f7b;
+      --accent-soft: #dce8df;
+      --chip: #222222;
+      --result-bg: #f3eee8;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --shadow: 0 14px 34px rgba(41, 31, 21, 0.08);
+      --font: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background:
+        radial-gradient(circle at top left, rgba(220, 232, 223, 0.7), transparent 30%),
+        linear-gradient(180deg, #f9f6f2 0%, #f6f2ee 100%);
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .logo-mark {
+      width: 68px;
+      height: 68px;
+      border-radius: 24px;
+      border: 2px solid #111;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 24px;
+      line-height: 1;
+      background: linear-gradient(180deg, #ffffff, #f0ece7);
+      flex-shrink: 0;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.08;
+      letter-spacing: -0.05em;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .panel {
+      background: rgba(255,253,251,0.92);
+      border: 1.5px solid #d8cfc7;
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .top-fields {
+      display: grid;
+      grid-template-columns: 120px 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .otp-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #2b2b2b, #131313);
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      padding: 0 18px;
+      white-space: nowrap;
+    }
+
+    .input, .textarea {
+      width: 100%;
+      border: 1.5px solid #302b27;
+      background: #fffdfa;
+      border-radius: 18px;
+      padding: 14px 16px;
+      outline: none;
+      transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .textarea {
+      min-height: 104px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .input:focus, .textarea:focus {
+      box-shadow: 0 0 0 4px rgba(111,143,123,0.14);
+      border-color: var(--accent);
+    }
+
+    .members {
+      display: grid;
+      gap: 14px;
+    }
+
+    .member-editor {
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,246,241,0.95));
+      border: 1.5px solid #1e1e1e;
+      border-radius: 26px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .member-editor::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 8px;
+      background: linear-gradient(180deg, var(--accent), rgba(111,143,123,0.2));
+    }
+
+    .member-top {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-left: 8px;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 999px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1.5px solid #ddd;
+      background: #e8e8e8;
+    }
+
+    .member-name {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .member-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding-left: 8px;
+    }
+
+    .ratio-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .ratio-side {
+      font-weight: 800;
+      font-size: 17px;
+      line-height: 1.1;
+      text-align: center;
+      min-width: 52px;
+    }
+
+    .ratio-side span {
+      display: block;
+      font-size: 23px;
+      letter-spacing: -0.03em;
+    }
+
+    .slider-wrap {
+      padding: 0 4px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 12px;
+      background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--fill, 50%), #ece5dd var(--fill, 50%), #ece5dd 100%);
+      border: 1.5px solid #111;
+      border-radius: 999px;
+      outline: none;
+      margin: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #111;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #111;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      cursor: pointer;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #202020, #111111);
+      color: #fff;
+      padding: 14px 22px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: #fffdf9;
+      color: #111;
+      border: 1.5px solid #111;
+      box-shadow: none;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .result-wrap {
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    #resultCanvas {
+      width: 1400px;
+      background:
+        radial-gradient(circle at top right, rgba(220, 232, 223, 0.85), transparent 24%),
+        linear-gradient(180deg, #f8f4ef 0%, var(--result-bg) 100%);
+      color: #111;
+      padding: 38px 54px 44px;
+      position: relative;
+    }
+
+    .result-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    }
+
+    .result-title-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .result-logo {
+      width: 64px;
+      height: 64px;
+      border: 3px solid #111;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #ffffff, #f1ebe4);
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .result-title {
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .nickname-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 110px;
+      max-width: 200px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.75);
+      color: #111;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+      border: 1.5px solid #111;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 34px;
+      row-gap: 24px;
+    }
+
+    .result-card {
+      display: grid;
+      grid-template-columns: 154px 1fr;
+      gap: 18px;
+      align-items: start;
+      background: rgba(255,255,255,0.32);
+      border: 1.5px solid rgba(0,0,0,0.1);
+      border-radius: 28px;
+      padding: 18px;
+      backdrop-filter: blur(2px);
+    }
+
+    .result-avatar {
+      width: 154px;
+      height: 154px;
+      border-radius: 999px;
+      object-fit: cover;
+      background: #dadada;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+    }
+
+    .result-content {
+      min-width: 0;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin: 4px 0 12px;
+    }
+
+    .bar-side {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.05;
+      text-align: center;
+      width: 38px;
+      color: #232323;
+    }
+
+    .bar-side strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .bar-track {
+      position: relative;
+      height: 20px;
+      border: 1.5px solid #111;
+      border-radius: 999px;
+      background: #fffdfa;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: linear-gradient(90deg, #5c7a69, #7fa08a);
+      border-radius: 999px;
+      width: 50%;
+    }
+
+    .reason-box {
+      min-height: 174px;
+      border: 1.6px solid #111;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.7);
+      padding: 17px 17px 15px;
+      font-size: 19px;
+      line-height: 1.58;
+      letter-spacing: -0.02em;
+      word-break: keep-all;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    .result-footer {
+      margin-top: 24px;
+      padding-top: 12px;
+      text-align: center;
+      font-size: 15px;
+      color: #6b6b6b;
+    }
+
+    .hidden-preload {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .top-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        align-items: flex-start;
+      }
+
+      .member-top {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        width: min(100%, calc(100% - 20px));
+        padding-top: 16px;
+      }
+
+      .panel,
+      .member-editor {
+        padding: 14px;
+        border-radius: 18px;
+      }
+
+      .member-top {
+        gap: 12px;
+      }
+
+      .avatar {
+        width: 52px;
+        height: 52px;
+      }
+
+      .member-name {
+        font-size: 21px;
+      }
+
+      .ratio-side {
+        min-width: 44px;
+        font-size: 15px;
+      }
+
+      .ratio-side span {
+        font-size: 20px;
+      }
+
+      .actions,
+      .result-actions {
+        justify-content: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="editorScreen" class="screen active">
+      <div class="hero">
+        <div class="title-wrap">
+          <div class="logo-mark">코</div>
+          <div>
+            <h1>코르티스 공수취향표</h1>
+            <div class="hero-sub">슬라이더로 공수 비율을 조정하고, 이유를 적은 뒤 결과 이미지를 저장하세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="top-fields">
+          <div class="otp-badge">OTP</div>
+          <input id="otpInput" class="input" maxlength="8" placeholder="OTP를 입력하세요. (최대 8자)" />
+          <input id="nicknameInput" class="input" maxlength="12" placeholder="아이디를 입력하세요. (최대 12자)" />
+        </div>
+      </div>
+
+      <div id="membersEditor" class="members"></div>
+
+      <div class="actions">
+        <button class="btn secondary" id="resetBtn" type="button">초기화</button>
+        <button class="btn" id="generateBtn" type="button">결과 생성</button>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="result-wrap">
+        <div id="resultCanvas"></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn secondary" id="backBtn" type="button">수정하러 가기</button>
+        <button class="btn" id="downloadBtn" type="button">이미지 저장</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const members = [
+      {
+        id: "james",
+        name: "제임스",
+        img: "https://images.unsplash.com/photo-1546961329-78bef0414d7c?auto=format&fit=crop&w=400&q=80",
+        ratio: 50,
+        reason: ""
+      },
+      {
+        id: "juhun",
+        name: "주훈",
+        img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+        ratio: 50,
+        reason: ""
+      },
+      {
+        id: "martin",
+        name: "마틴",
+        img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+        ratio: 50,
+        reason: ""
+      },
+      {
+        id: "sunghyun",
+        name: "성현",
+        img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80",
+        ratio: 50,
+        reason: ""
+      },
+      {
+        id: "gunho",
+        name: "건호",
+        img: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?auto=format&fit=crop&w=400&q=80",
+        ratio: 50,
+        reason: ""
+      }
+    ];
+
+    const editorScreen = document.getElementById("editorScreen");
+    const resultScreen = document.getElementById("resultScreen");
+    const membersEditor = document.getElementById("membersEditor");
+    const resultCanvas = document.getElementById("resultCanvas");
+    const otpInput = document.getElementById("otpInput");
+    const nicknameInput = document.getElementById("nicknameInput");
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function setSliderBackground(slider) {
+      const value = Number(slider.value);
+      slider.style.setProperty("--fill", `${value}%`);
+    }
+
+    function renderEditors() {
+      membersEditor.innerHTML = members.map((member, index) => `
+        <article class="member-editor">
+          <div class="member-top">
+            <img class="avatar" src="${member.img}" alt="${member.name}" crossorigin="anonymous" />
+            <div class="member-name">${member.name}</div>
+          </div>
+
+          <div class="member-grid">
+            <div>
+              <div class="ratio-header">
+                <div class="ratio-side">공<span id="gongValue-${index}">${member.ratio}</span></div>
+                <div class="slider-wrap">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="${member.ratio}"
+                    data-index="${index}"
+                    id="slider-${index}"
+                  />
+                </div>
+                <div class="ratio-side">수<span id="suValue-${index}">${100 - member.ratio}</span></div>
+              </div>
+            </div>
+            <textarea
+              class="textarea"
+              id="reason-${index}"
+              maxlength="300"
+              placeholder="이 멤버의 공수 취향 이유를 적어주세요. (최대 300자)"
+            >${escapeHtml(member.reason)}</textarea>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll('input[type="range"]').forEach((slider) => {
+        setSliderBackground(slider);
+        slider.addEventListener("input", (e) => {
+          const index = Number(e.target.dataset.index);
+          const value = Number(e.target.value);
+          members[index].ratio = value;
+          document.getElementById(`gongValue-${index}`).textContent = value;
+          document.getElementById(`suValue-${index}`).textContent = 100 - value;
+          setSliderBackground(e.target);
+        });
+      });
+
+      members.forEach((_, index) => {
+        const textarea = document.getElementById(`reason-${index}`);
+        textarea.addEventListener("input", (e) => {
+          members[index].reason = e.target.value;
+        });
+      });
+    }
+
+    function buildResult() {
+      const otp = (otpInput.value || "OTP").trim().slice(0, 8) || "OTP";
+      const nickname = nicknameInput.value.trim().slice(0, 12);
+      const displayId = nickname || "아이디";
+
+      resultCanvas.innerHTML = `
+        <div class="result-header">
+          <div class="chip">${escapeHtml(otp)}</div>
+          <div class="result-title-box">
+            <div class="result-logo">코</div>
+            <div class="result-title">공수취향표</div>
+          </div>
+          <div class="nickname-chip">${escapeHtml(displayId)}</div>
+        </div>
+
+        <div class="result-grid">
+          ${members.map((member) => `
+            <section class="result-card">
+              <img class="result-avatar" src="${member.img}" alt="${member.name}" crossorigin="anonymous" />
+              <div class="result-content">
+                <div class="bar-row">
+                  <div class="bar-side">공<strong>${member.ratio}</strong></div>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width:${member.ratio}%"></div>
+                  </div>
+                  <div class="bar-side">수<strong>${100 - member.ratio}</strong></div>
+                </div>
+                <div class="reason-box">${escapeHtml(member.reason || " ")}</div>
+              </div>
+            </section>
+          `).join("")}
+        </div>
+
+        <div class="result-footer">코르티스 공수취향표 생성기</div>
+      `;
+    }
+
+    function showResult() {
+      buildResult();
+      editorScreen.classList.remove("active");
+      resultScreen.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showEditor() {
+      resultScreen.classList.remove("active");
+      editorScreen.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function downloadImage() {
+      const button = document.getElementById("downloadBtn");
+      const original = button.textContent;
+      try {
+        button.disabled = true;
+        button.textContent = "이미지 생성 중...";
+
+        const canvas = await html2canvas(resultCanvas, {
+          backgroundColor: "#ededed",
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          logging: false
+        });
+
+        const link = document.createElement("a");
+        const otp = (otpInput.value || "OTP").trim().slice(0, 8) || "OTP";
+        link.download = `콜페스_공수취향표_${otp}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch (error) {
+        console.error(error);
+        alert("이미지 저장 중 문제가 발생했어요. 이미지 주소가 외부 차단된 경우일 수 있어요. 직접 업로드한 이미지 경로를 사용해 보세요.");
+      } finally {
+        button.disabled = false;
+        button.textContent = original;
+      }
+    }
+
+    function resetAll() {
+      otpInput.value = "";
+      nicknameInput.value = "";
+      members.forEach((member) => {
+        member.ratio = 50;
+        member.reason = "";
+      });
+      renderEditors();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", showResult);
+    document.getElementById("backBtn").addEventListener("click", showEditor);
+    document.getElementById("downloadBtn").addEventListener("click", downloadImage);
+    document.getElementById("resetBtn").addEventListener("click", resetAll);
+
+    renderEditors();
+  </script>
+</body>
+</html>
