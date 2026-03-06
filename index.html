@@ -726,13 +726,16 @@
     }
 
     function buildResult() {
-      const otp = (otpInput.value || "OTP").trim().slice(0, 8) || "OTP";
+      const cpName = otpInput.value.trim().slice(0, 12);
       const nickname = nicknameInput.value.trim().slice(0, 12);
       const displayId = nickname || "아이디";
 
       resultCanvas.innerHTML = `
         <div class="result-header">
-          <div class="chip">${escapeHtml(otp)}</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="chip">OTP</div>
+            <div>${escapeHtml(cpName || "CP")}</div>
+          </div>
           <div class="result-title-box">
             <div class="result-logo">
               <img src="img/logo.png">
