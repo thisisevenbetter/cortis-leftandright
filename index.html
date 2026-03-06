@@ -323,12 +323,12 @@
 
     #resultCanvas {
       width: 1440px;
-      height: 1080px;
+      height: 960px;
       background:
         radial-gradient(circle at top right, rgba(220, 232, 223, 0.85), transparent 24%),
         linear-gradient(180deg, #f8f4ef 0%, var(--result-bg) 100%);
       color: #111;
-      padding: 34px 48px 24px;
+      padding: 30px 48px 20px;
       position: relative;
       overflow: hidden;
     }
@@ -434,15 +434,11 @@
     .result-avatar {
       width: 124px;
       height: 124px;
-      min-width: 124px;
-      min-height: 124px;
-      max-width: 124px;
-      max-height: 124px;
       border-radius: 50%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      background: #dadada;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #dadada;
       border: 2px solid rgba(255,255,255,0.9);
       box-shadow: 0 10px 18px rgba(0,0,0,0.08);
     }
@@ -690,7 +686,11 @@
       membersEditor.innerHTML = members.map((member, index) => `
         <article class="member-editor">
           <div class="member-top">
-            <img class="avatar" src="${member.img}" alt="${member.name}" crossorigin="anonymous" />
+            <div
+              class="result-avatar"
+              style="background-image: url('${member.img}');"
+              aria-label="${member.name}"
+            ></div>
             <div class="member-name">${member.name}</div>
           </div>
 
@@ -764,7 +764,11 @@
         <div class="result-grid">
           ${members.map((member) => `
             <section class="result-card">
-              <img class="result-avatar" src="${member.img}" alt="${member.name}" crossorigin="anonymous" />
+              <div
+                class="result-avatar"
+                style="background-image: url('${member.img}');"
+                aria-label="${member.name}"
+              ></div>
               <div class="result-content">
                 <div class="bar-row">
                   <div class="bar-side">공<strong>${member.ratio}</strong></div>
@@ -819,11 +823,15 @@
 
         const canvas = await html2canvas(resultCanvas, {
           backgroundColor: null,
-          scale: window.devicePixelRatio > 1 ? 2 : 1.5,
+          scale: 2,
           useCORS: true,
           allowTaint: false,
           logging: false,
-          imageTimeout: 0
+          imageTimeout: 0,
+          width: 1440,
+          height: 1080,
+          windowWidth: 1440,
+          windowHeight: 1080
         });
 
         const link = document.createElement("a");
