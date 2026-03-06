@@ -322,35 +322,36 @@
     }
 
     #resultCanvas {
-      width: 1440px;
-      height: 960px;
+      width: 1200px;
+      height: 900px;
       background:
         radial-gradient(circle at top right, rgba(220, 232, 223, 0.85), transparent 24%),
         linear-gradient(180deg, #f8f4ef 0%, var(--result-bg) 100%);
       color: #111;
-      padding: 30px 48px 20px;
+      padding: 26px 34px 18px;
       position: relative;
       overflow: hidden;
+      flex: 0 0 auto;
     }
 
     .result-header {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 18px;
-      margin-bottom: 26px;
+      gap: 14px;
+      margin-bottom: 16px;
     }
 
     .chip {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 48px;
-      padding: 0 20px;
+      min-height: 42px;
+      padding: 0 18px;
       border-radius: 999px;
       background: var(--chip);
       color: #fff;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 900;
       letter-spacing: -0.04em;
       line-height: 1;
@@ -384,7 +385,7 @@
     }
 
     .result-title {
-      font-size: 40px;
+      font-size: 32px;
       font-weight: 900;
       letter-spacing: -0.05em;
       line-height: 1;
@@ -395,14 +396,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      min-width: 110px;
-      max-width: 200px;
-      padding: 0 16px;
+      min-height: 40px;
+      min-width: 96px;
+      max-width: 180px;
+      padding: 0 14px;
       border-radius: 999px;
       background: rgba(255,255,255,0.75);
       color: #111;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       line-height: 1;
       text-align: center;
@@ -415,33 +416,44 @@
     .result-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      column-gap: 24px;
-      row-gap: 14px;
+      column-gap: 20px;
+      row-gap: 12px;
     }
     
     .result-card {
       display: grid;
-      grid-template-columns: 124px minmax(0, 1fr);
-      gap: 14px;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 12px;
       align-items: start;
       background: rgba(255,255,255,0.32);
       border: 1.5px solid rgba(0,0,0,0.1);
-      border-radius: 24px;
-      padding: 14px;
+      border-radius: 22px;
+      padding: 12px;
       backdrop-filter: blur(2px);
     }
 
     .result-avatar {
-      width: 124px;
-      height: 124px;
+      width: 110px;
+      height: 110px;
+      min-width: 110px;
+      min-height: 110px;
+      max-width: 110px;
+      max-height: 110px;
       border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-color: #dadada;
+      overflow: hidden;
+      background: #dadada;
       border: 2px solid rgba(255,255,255,0.9);
-      box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 14px rgba(0,0,0,0.08);
+      position: relative;
     }
+
+.result-avatar-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
     .result-content {
       min-width: 0;
@@ -491,13 +503,13 @@
     }
 
     .reason-box {
-      min-height: 132px;
+      min-height: 118px;
       border: 1.6px solid #111;
-      border-radius: 20px;
+      border-radius: 18px;
       background: rgba(255,255,255,0.7);
-      padding: 14px 14px 12px;
-      font-size: 17px;
-      line-height: 1.5;
+      padding: 12px 12px 10px;
+      font-size: 15px;
+      line-height: 1.45;
       letter-spacing: -0.02em;
       word-break: keep-all;
       white-space: pre-wrap;
@@ -505,10 +517,10 @@
     }
 
     .result-footer {
-      margin-top: 14px;
+      margin-top: 10px;
       padding-top: 0;
       text-align: center;
-      font-size: 15px;
+      font-size: 14px;
       color: #6b6b6b;
     }
 
@@ -667,6 +679,8 @@
     const resultCanvas = document.getElementById("resultCanvas");
     const otpInput = document.getElementById("otpInput");
     const nicknameInput = document.getElementById("nicknameInput");
+    const EXPORT_WIDTH = 1200;
+    const EXPORT_HEIGHT = 900; // 4:3
 
     function escapeHtml(str) {
       return String(str)
@@ -686,11 +700,9 @@
       membersEditor.innerHTML = members.map((member, index) => `
         <article class="member-editor">
           <div class="member-top">
-            <div
-              class="result-avatar"
-              style="background-image: url('${member.img}');"
-              aria-label="${member.name}"
-            ></div>
+            <div class="result-avatar">
+              <div class="result-avatar-image" style="background-image: url('${member.img}');"></div>
+            </div>
             <div class="member-name">${member.name}</div>
           </div>
 
@@ -816,32 +828,64 @@
     async function downloadImage() {
       const button = document.getElementById("downloadBtn");
       const original = button.textContent;
+    
       try {
         button.disabled = true;
         button.textContent = "이미지 생성 중...";
-        await waitForImages(resultCanvas);
-
-        const canvas = await html2canvas(resultCanvas, {
+    
+        // 최신 내용으로 다시 렌더
+        buildResult();
+    
+        // 고정 출력용 복제본 생성
+        const exportStage = document.createElement("div");
+        exportStage.style.position = "fixed";
+        exportStage.style.left = "-99999px";
+        exportStage.style.top = "0";
+        exportStage.style.width = `${EXPORT_WIDTH}px`;
+        exportStage.style.height = `${EXPORT_HEIGHT}px`;
+        exportStage.style.overflow = "hidden";
+        exportStage.style.pointerEvents = "none";
+        exportStage.style.zIndex = "-1";
+        exportStage.style.background = "transparent";
+    
+        const clone = resultCanvas.cloneNode(true);
+        clone.style.width = `${EXPORT_WIDTH}px`;
+        clone.style.height = `${EXPORT_HEIGHT}px`;
+        clone.style.margin = "0";
+        clone.style.transform = "none";
+        clone.style.maxWidth = "none";
+        clone.style.minWidth = `${EXPORT_WIDTH}px`;
+        clone.style.minHeight = `${EXPORT_HEIGHT}px`;
+    
+        exportStage.appendChild(clone);
+        document.body.appendChild(exportStage);
+    
+        await waitForImages(exportStage);
+    
+        const canvas = await html2canvas(clone, {
           backgroundColor: null,
           scale: 2,
           useCORS: true,
           allowTaint: false,
           logging: false,
           imageTimeout: 0,
-          width: 1440,
-          height: 1080,
-          windowWidth: 1440,
-          windowHeight: 1080
+          width: EXPORT_WIDTH,
+          height: EXPORT_HEIGHT,
+          windowWidth: EXPORT_WIDTH,
+          windowHeight: EXPORT_HEIGHT,
+          scrollX: 0,
+          scrollY: 0
         });
-
+    
+        document.body.removeChild(exportStage);
+    
         const link = document.createElement("a");
-        const otp = (otpInput.value || "OTP").trim().slice(0, 8) || "OTP";
-        link.download = `콜페스_공수취향표.png`;
+        link.download = "cortisrps.png";
         link.href = canvas.toDataURL("image/png");
         link.click();
       } catch (error) {
         console.error(error);
-        alert("이미지 저장 중 문제가 발생했어요. 이미지 주소가 외부 차단된 경우일 수 있어요. 직접 업로드한 이미지 경로를 사용해 보세요.");
+        alert("이미지 저장 중 문제가 발생했어요.");
       } finally {
         button.disabled = false;
         button.textContent = original;
